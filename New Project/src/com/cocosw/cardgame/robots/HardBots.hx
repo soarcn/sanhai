@@ -1,0 +1,197 @@
+package com.cocosw.cardgame.robots;
+
+/**
+ * ...
+ * @author soar
+ */
+
+class HardBots 
+{
+
+	public static final int MAX = 10;
+	public static final int MIN = -10;
+	
+	private int ME, HIM;
+	private int profondeurMax;
+	private Card[] myDeck, hisDeck, board;
+	private String[] elements;
+	private boolean elementary, same, plus, sameWall, combo, plusWall;
+	
+	public new(int me, int him, Card[] myDeck, Card[] hisDeck, Card[] board, String[] elements, boolean same, boolean plus, boolean sameWall, boolean combo, boolean plusWall, boolean elementary)
+	{	
+		ME = me;
+		HIM = him;
+		profondeurMax = 2;
+		
+		this.myDeck = myDeck;
+		this.hisDeck = hisDeck;
+		this.board = board;
+		this.elements = elements;
+		this.same = same;
+		this.plus = plus;
+		this.sameWall = sameWall;
+		this.combo = combo;
+		this.plusWall = plusWall;
+		this.elementary = elementary;
+	}
+
+	@Override
+	public Action nextMove() {
+		Card carteAJouer = null;
+		int caseOuJouer = -1;
+		
+		int cardOnBoard = 0;
+		for (int i = 0; i < board.length; i++) {
+			if (board[i] != null) {
+				cardOnBoard++;
+			}
+		}
+		if (cardOnBoard < 3) {
+			profondeurMax = 2;
+		} else if (cardOnBoard < 5) {
+			profondeurMax = 3;
+		} else {
+			profondeurMax = 4;
+		}
+		
+		int gainMax = MIN;
+		int gain = 0;
+		
+		for (int c = 0; c < myDeck.length; c++) { 
+			if (myDeck[c] != null) {
+				if (!myDeck[c].isPlayed()) {
+					for (int slot = 0; slot < board.length; slot++) {
+						if (board[slot] == null) { // For each empty space on the board
+							Card[] copyBoard = clone(board);
+							Card card = myDeck[c];
+							card.lock();
+							
+							simulate(ME, card, slot, copyBoard);
+							gain = min(copyBoard, profondeurMax);
+							
+							if (gain > gainMax) {
+								gainMax = gain;
+								carteAJouer = card;
+								caseOuJouer = slot;
+							}
+	
+							card.resetBonusMalusIfNeeded(true);
+							card.unlock();
+						}
+					}
+				}
+			}
+		}
+
+		return new Action(carteAJouer, caseOuJouer, gain);
+	}
+	
+	private void simulate(int player, Card card, int slot, Card[] board) {
+		MinMaxEngine engine = new MinMaxEngine(board, elements, same, plus, sameWall, combo, plusWall, elementary);
+		engine.playCard(player, card, slot);
+	}
+	
+	private int min(Card[] board, int profondeur) {
+		if (profondeur == 0 || isBoardFull(board)) {
+			return eval(board);
+		}
+		
+		int gainMin = MAX;
+		int gain;
+		
+		for (int c = 0; c < hisDeck.length; c++) { 
+			if (hisDeck[c] != null) {
+				if (!hisDeck[c].isPlayed()) {
+					// For each card I have left
+					for (int slot = 0; slot < board.length; slot++) {
+						if (board[slot] == null) { // For each empty space on the board
+							Card[] copyBoard = clone(board);
+							Card card = hisDeck[c];
+							card.lock();
+							
+							simulate(HIM, card, slot, copyBoard);
+							gain = max(copyBoard, profondeur - 1);
+							
+							if (gain < gainMin) {
+								gainMin = gain;
+							}
+
+							card.resetBonusMalusIfNeeded(true);
+							card.unlock();
+						}
+					}
+				}
+			}
+		}
+		
+		return gainMin;
+	}
+	
+	private int max(Card[] board, int profondeur) {
+		if (profondeur == 0 || isBoardFull(board)) {
+			return eval(board);
+		}
+		
+		int gainMax = MIN;
+		int gain;
+		
+		for (int c = 0; c < myDeck.length; c++) { 
+			if (myDeck[c] != null) {
+				if (!myDeck[c].isPlayed()) {
+					for (int slot = 0; slot < board.length; slot++) {
+						if (board[slot] == null) { // For each empty space on the board
+							Card[] copyBoard = clone(board);
+							Card card = myDeck[c];
+							card.lock();
+							
+							simulate(ME, card, slot, copyBoard);
+							gain = min(copyBoard, profondeur - 1);
+							
+							if (gain > gainMax) {
+								gainMax = gain;
+							}
+
+							card.resetBonusMalusIfNeeded(true);
+							card.unlock();
+						}
+					}
+				}
+			}
+		}
+		
+		return gainMax;
+	}
+	
+	private int eval(Card[] board) {
+		int eval = 0;
+		for (int c = 0; c < board.length; c++) {
+			if (board[c] != null) {
+				eval += board[c].getColor() == ME ? 1 : 0;
+			}
+		}
+		return eval;
+	}
+	
+	private boolean isBoardFull(Card[] board) {
+		for (int c = 0; c < board.length; c++) {
+			if (board[c] == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private Card[] clone(Card[] original) {
+		Card[] copy = new Card[original.length];
+		for (int c = 0; c < original.length; c++) {
+			copy[c] = original[c] == null ? null : original[c].clone();
+		}
+		return copy;
+	}
+
+	@Override
+	public int getPlayerValue() {
+		return ME;
+	}
+	
+}
