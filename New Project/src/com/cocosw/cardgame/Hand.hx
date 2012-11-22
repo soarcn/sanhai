@@ -55,8 +55,8 @@ class Hand
 	
 	// 处理卡片的点击事件
 	public function onCardClicked(card:Card) {
-		
 		if (card == selected) {
+			resetAll();
 			return;
 		} 
 		resetAll();

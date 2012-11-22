@@ -11,7 +11,7 @@
 	<window orientation="landscape" vsync="true" antialiasing="1" if="cpp" />
 	
 	<window width="800" height="600" if="desktop" />
-	<window width="0" height="0" if="web" />
+	<window width="800" height="480" if="web" antialiasing="1"/>
 	<window orientation="landscape" if="mobile" />
 	
 	<!-- classpath, haxe libs -->

@@ -1,8 +1,9 @@
 package com.cocosw.cardgame;
  
 import com.cocosw.cardgame.Card;
-import com.cocosw.cardgame.robots.EasyBots;
+import com.haxepunk.graphics.Image;
 import com.haxepunk.graphics.Text;
+import com.haxepunk.HXP;
 import com.haxepunk.World;
 import nme.geom.Point;
  
@@ -32,6 +33,9 @@ class GameWorld extends World
 	   myhand = initMyCard();
 	   aihand = initAICard();
 	   currenthand = myhand;
+	   var bg = new Image("gfx/background_landscape.png");
+	   bg.scale = 0.6;
+	   addGraphic(bg, HXP.BASELAYER + 1);
     }
 	
 	//初始化我方卡片
@@ -44,7 +48,7 @@ class GameWorld extends World
 		return new Hand(this,ENERGY, CardManager.generateXCards(5));
 	}
      
-		//根据行列获得点位
+	//根据行列获得点位
 	private function getPosition (row:Int, column:Int):Point {
 		return new Point (sx+column * (Card.CARDHIGHT + GAP), sy+row * (Card.CARDHIGHT + GAP));
 		
