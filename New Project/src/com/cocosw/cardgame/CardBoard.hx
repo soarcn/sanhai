@@ -17,9 +17,11 @@ class CardBoard
 	}
 	
 	//放置
-	public function place(id:Int, card:Card) {
-		if (id>=0 && id<9)
-			cardInBoard[id] = card;
+	public function place(slot:Slot, card:Card) {
+		if (slot.id>=0 && slot.id<9) {
+			cardInBoard[slot.id] = card;
+			slot.addCard(card);
+		}
 	}
 	
 	//获得

@@ -50,7 +50,7 @@ class Card extends View
 	private var background:Spritemap;
 	
 	static public inline var  CARDHIGHT:Int = 75;
-	static public inline var CARDWIGHT:Int = 75;
+	static public inline var CARDWIGHT:Int = 74;
 	
 	static private inline var PAINT_SIZE:Int = 12;
 	static private  inline var PAINT_COLOR:Int = 0xff000000;
@@ -62,7 +62,7 @@ class Card extends View
 	public var slot:Slot;
 	public var hand:Hand;
 	
-    public function new(x:Float, y:Float,value:CardValue=null, cbFunc:CardCallback = null, slot:Slot)
+    public function new(x:Float, y:Float,value:CardValue=null, cbFunc:CardCallback = null, slot:Slot=null)
     {
         super(x, y);
 		this.slot = slot;
@@ -171,5 +171,45 @@ class Card extends View
  
         super.update();
     }
+	
+	public function getRightValue():Int {
+		return cardvalue.right;
+	}
  
+	public function getLeftValue():Int {
+		return cardvalue.left;
+	}
+	
+	public function getTopValue():Int {
+		return cardvalue.top;
+	}	
+	
+	public function getBottomValue():Int {
+		return cardvalue.bottom;
+	}
+	
+	public override function toString():String {
+		return "left=" + getLeftValue + ", right=" + getRightValue();
+	}
+	
+	public function clone():Card {
+		return new Card(x, y, cardvalue, cb, slot);
+	}
+	
+	public function isPlayed() {
+		return false;
+	}
+	
+	public function getLevel():Int {
+		return 1;
+	}
+	
+	public function getColor():Int {
+		return 12345;
+	}
+	
+	public function getTotal():Int {
+		return cardvalue.getTotal();
+	}
+	
 }

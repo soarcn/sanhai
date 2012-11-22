@@ -47,6 +47,9 @@ class CardValue
 		return num2Str(bottom);
 	}
 	
+	public function getTotal():Int {
+		return top+right+left+bottom;
+	}
 	
 	private static function num2Str(value:Int):String {
 		if (value > 9)

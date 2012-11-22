@@ -14,9 +14,10 @@ class GameWorld extends World
 	private static inline var GAP:Int = 16;
 	private static inline var CARDNUM = 5;
 	private var board:CardBoard;
-	
-	
-	private var sx = 150;
+	private var currenthand:Hand;	
+	private var myhand:Hand;	
+	private var aihand:Hand;	
+	private var sx = 120;
 	private var sy = 50;
 	
     public function new()
@@ -28,18 +29,19 @@ class GameWorld extends World
     public override function begin()
     {
 	   initBoard ();
-	   initMyCard();
-	   initAICard();
+	   myhand = initMyCard();
+	   aihand = initAICard();
+	   currenthand = myhand;
     }
 	
 	//初始化我方卡片
-	private function initMyCard() {
-		var hand = new Hand(Role.ME, cards).;
+	private function initMyCard():Hand {
+		return new Hand(this,ME, CardManager.generateXCards(5));
 	}
 	
 	//初始化对手的卡片
-	private function initAICard() {
-		
+	private function initAICard():Hand {
+		return new Hand(this,ENERGY, CardManager.generateXCards(5));
 	}
      
 		//根据行列获得点位
@@ -61,20 +63,21 @@ class GameWorld extends World
 	}
 	
 	//点击棋盘空位发生的事件
-	private function onSlotClicked(slot:Slot):Void {	
-		board.place(slot.id, generateCard(null, onCardClicked, slot));
-		slot.addCard(board.get(slot.id));
-		board.checkCards();
+	private function onSlotClicked(slot:Slot):Void {
+		var card = currenthand.selected;
+		if (card!=null){
+			board.place(slot, card);
+			board.checkCards();
+			changeHand();
+		}
 	}
 	
-	//生成一张随机卡片,位置为传入的pos,或者为0
-	private function generateCard(pos:Point,onCardClicked:CardCallback,slot:Slot):Card {
-		if (pos == null)
-			pos = new Point(0, 0);
-		return new Card(pos.x, pos.y,CardValue.randomCard(),onCardClicked,slot);
+	//更换选手
+	private function changeHand() {
+		currenthand.selected = null;
+		currenthand = currenthand == aihand?myhand:aihand;
 	}
 	
-
 	
 	public function onCardClicked(card:Card) {
 		if (card.slot!=null)

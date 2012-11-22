@@ -288,7 +288,7 @@ class EasyBots
 	private function gainSame( player:Int,  board:Array<Card>, what:Card,  cell:Int):Int
 	{
 		var gain = 0;
-		ArrayList<Integer> cards = new ArrayList<Integer>(); // Cartes subissant/permettant Identique
+		var cards = new ArrayList<Integer>(); // Cartes subissant/permettant Identique
 		var carteAdverse = 0;
 		
 		if (cell - 3 >= 0 && board[cell - 3] != null) // carte du dessus si existante
