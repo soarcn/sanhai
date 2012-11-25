@@ -42,6 +42,7 @@ class Card extends View
 	private var color;
 	private var rewardDirectColor;
 	private var visible:Bool;*/
+	private var scaleX:Float;
 	
 	private var animTempColor:Int;
 	//背景的状态
@@ -67,7 +68,6 @@ class Card extends View
         super(x, y);
 		this.slot = slot;
         // create a new spritemap (image, frameWidth, frameHeight)
-        sprite = new Image("gfx/toss.png");
 		
 		background = new Spritemap("gfx/cardback.png",CARDHIGHT,CARDWIGHT);
              
@@ -76,9 +76,8 @@ class Card extends View
 		
 		background.play("front");
 		if (value==null)
-			cardvalue = new CardValue();
-		else
-			cardvalue = value;
+			value = new CardValue();
+		cardvalue = value;
 		
 		this.cb = cbFunc;
  
@@ -123,13 +122,14 @@ class Card extends View
 	var ease:EaseFunction;
 	
 	override function clicked(view:View) {
-		if (cb != null)
-		
-		cb(this);
+
 	}
 	
-	public function flip():Void {
-		trace("flip");
+	
+	public function flip(anim:Bool = true):Void {
+		if (anim) {
+		//	this._
+		}
 		if (backstate) {
 			background.play("back");
 		} else {
@@ -140,10 +140,17 @@ class Card extends View
 	
 	override function  mouseDown(){
 		//trace("mouseDown");
+		#if mobile
+		if (cb != null)
+			cb(this);
+		#end
 	}
 	
-	override function  mouseOver(){
-		//trace("mouseOver");
+	override function  mouseOver() {
+		#if !mobile
+		if (cb != null)
+		cb(this);
+		#end
 	}
  
     private function setAnimations()

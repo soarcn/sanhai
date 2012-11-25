@@ -1,6 +1,7 @@
 package com.cocosw.cardgame;
 import com.cocosw.cardgame.uiview.View;
 import com.haxepunk.Entity;
+import com.haxepunk.Sfx;
 import com.haxepunk.World;
 
 /**
@@ -20,33 +21,35 @@ class Hand
 	public var cards:Array<Card>;
 	public var world:World;
 	public var selected:Card;
+	private var startX:Int;
 	private static inline var DIS = 30;
 	
-	public function new(world:World,role:Role,cards:Array<Card>) 
+	public function new(world:World,role:Role,cards:Array<Card>,startX:Int = -1) 
 	{
 		this.world = world;
 		this.role = role;
 		this.cards = cards;
 		this.selected = null;
+		this.startX = startX;
 		initCard();
 	}
 	
 	//初始化发牌的位置
 	private function initCard() {
-		var sx = 0;
 		// 我方在右边,敌人在左边
 		// 我方在下,敌人在上
-		role == Role.ME?sx = 400:sx = 20;
+		if (startX == -1)
+		role == Role.ME?startX = 430:startX = 30;
 		
 		var i = 0;
 		for (c in cards) {
 			
-			c.x = sx;
-			c.y = (i + 1) * 50;
-			trace(c.y);
+			c.x = startX;
+			c.y = (i) * 50 +20;
 			c.hand = this;
+			//c.layer = 10 - i;
 			if (role==ENERGY)
-				c.flip();
+				c.flip(false);
 			this.world.add(c);
 			c.cb = onCardClicked;
 			i++;
@@ -55,12 +58,15 @@ class Hand
 	
 	// 处理卡片的点击事件
 	public function onCardClicked(card:Card) {
+
 		if (card == selected) {
-			resetAll();
+			//resetAll();
 			return;
-		} 
+		}
+	//	new Sfx(ApplicationMain.getAsset("sfx/hit.mp3")).play(0.3);
 		resetAll();
 		selected = card;
+		trace(card.y);
 		// 移出一段
 		if (role == ENERGY) //向右
 		{
@@ -68,8 +74,9 @@ class Hand
 		} else {
 			selected.moveBy(-DIS,0);
 		}
-		
 	}
+	
+	
 	
 	//把现有卡片移动回原有位置
 	public function resetAll() {
@@ -83,4 +90,11 @@ class Hand
 		selected = null;
 	}
 	
+	// 一局结束了,处理一些事情
+	public function end() {
+		for (c in cards) {
+			c.cb = null;
+		}
+		
+	}
 }

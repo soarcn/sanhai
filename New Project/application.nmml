@@ -3,7 +3,7 @@
 	<!-- NMML reference: https://gist.github.com/1763850 -->
 	
 	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
-	<meta title="New Project" package="com.cocosw.cardgame.NewProject" version="1.0.0" company="soar" />
+	<meta title="山海斗" package="com.cocosw.cardgame" version="1.0.0" company="椰子工作室" />
 	
 	<!-- output -->
 	<app main="com.cocosw.cardgame.Main" file="NewProject" path="bin" />
@@ -11,8 +11,8 @@
 	<window orientation="landscape" vsync="true" antialiasing="1" if="cpp" />
 	
 	<window width="800" height="600" if="desktop" />
-	<window width="800" height="480" if="web" antialiasing="1"/>
-	<window orientation="landscape" if="mobile" />
+	<window width="0" height="0" if="web" antialiasing="1"/>
+	<window width="0" height="0" orientation="landscape" if="mobile" />
 	
 	<!-- classpath, haxe libs -->
 	<source path="src" />
