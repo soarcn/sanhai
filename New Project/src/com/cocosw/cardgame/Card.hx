@@ -7,10 +7,13 @@ import com.haxepunk.graphics.Text;
 import com.haxepunk.HXP;
 import com.haxepunk.Entity;
 import com.haxepunk.Graphic;
+import com.haxepunk.tweens.misc.VarTween;
 import com.haxepunk.utils.Ease;
 import com.haxepunk.utils.Input;
 import com.haxepunk.utils.Key;
 import com.cocosw.cardgame.uiview.View;
+import com.haxepunk.Tween;
+ 
 
 /**
  * ...
@@ -21,64 +24,53 @@ typedef CardCallback = Card -> Void;
 
 class Card extends View
 {
+	private var sprite:Image;
 	
-	
-	private var velocity:Float;
-    private var sprite:Image;
-	
-	//private var name:String;
 	private var element:String;
 	private var level:Int;
-	//private var edition;
-	//private var number;
 	private var locked = false;
 	private var selected = false; 
 	private var hasMalus = false; 
 	private var hasBonus = false;
-/*	private var redFace; 
-	private var blueFace;
-	private var backFace;
-	private var cardView;
-	private var color;
-	private var rewardDirectColor;
-	private var visible:Bool;*/
 	private var scaleX:Float;
 	
 	private var animTempColor:Int;
 	//背景的状态
-	private var backstate = true;
+	public var backstate = true;
 	//背景图
 	private var background:Spritemap;
 	
-	static public inline var  CARDHIGHT:Int = 75;
-	static public inline var CARDWIGHT:Int = 74;
+	static public inline var  CARDHIGHT:Int = 150;
+	static public inline var CARDWIGHT:Int = 150;
 	
-	static private inline var PAINT_SIZE:Int = 12;
-	static private  inline var PAINT_COLOR:Int = 0xff000000;
-	static private inline var SHADOW_COLOR:Int = 0xffffffff;
-    static private  inline  var SHADOW_OFFSET:Int = 1;
+	static private inline var PAINT_SIZE:Int = 20;
+	static private  inline var PAINT_COLOR:Int = 0x000000;
+	static private inline var SHADOW_COLOR:Int = 0xffffff;
 	
 	public var cb:CardCallback;
 	public var cardvalue:CardValue;
 	public var slot:Slot;
 	public var hand:Hand;
 	
+	static private  inline  var X_OFFSET:Int = 80;
+	
     public function new(x:Float, y:Float,value:CardValue=null, cbFunc:CardCallback = null, slot:Slot=null)
     {
         super(x, y);
 		this.slot = slot;
         // create a new spritemap (image, frameWidth, frameHeight)
-		
+		type = "Card";
 		background = new Spritemap("gfx/cardback.png",CARDHIGHT,CARDWIGHT);
-             
+        background.centerOrigin();
         background.add("front", [0]);
         background.add("back", [1]);
+
 		
 		background.play("front");
 		if (value==null)
 			value = new CardValue();
 		cardvalue = value;
-		
+		centerOrigin();
 		this.cb = cbFunc;
  
         // defines left and right as arrow keys and WASD controls
@@ -88,54 +80,62 @@ class Card extends View
 		setHitbox(background.width, background.height);
 		
 		var taillePinceau =  PAINT_SIZE;
-	
+		var ft = { size:PAINT_SIZE, font:"font/m04.TTF", color:PAINT_COLOR }
+		var bg = {size:PAINT_SIZE-1,font:"font/m04b.TTF",color:SHADOW_COLOR}
 		
-		var tt = new Text(cardvalue.t(),  50+(3 * taillePinceau / 2 + 2) / 2, taillePinceau);
-		var lt = new Text(cardvalue.l(),  50+3,  3 * taillePinceau / 2);
-		var bt = new Text(cardvalue.b(),  50+(3 * taillePinceau / 2 + 2) / 2,  2 * taillePinceau);
-		var rt = new Text(cardvalue.r(),  50+(3 * taillePinceau / 2) - 2, 3 * taillePinceau / 2);
+		var ta = new Text(cardvalue.t(),  X_OFFSET + taillePinceau, taillePinceau,0,0,bg);
+		var tt = new Text(cardvalue.t(),  X_OFFSET + taillePinceau, taillePinceau, 0, 0, ft);
+		var la = new Text(cardvalue.l(),  X_OFFSET ,  2 * taillePinceau ,0,0,bg);
+		var lt = new Text(cardvalue.l(),  X_OFFSET ,  2 * taillePinceau , 0, 0, ft);
+		var ba = new Text(cardvalue.b(),  X_OFFSET +taillePinceau,  3 * taillePinceau,0,0,bg);
+		var bt = new Text(cardvalue.b(),  X_OFFSET +taillePinceau,  3 * taillePinceau,0,0,ft);
+		var ra = new Text(cardvalue.r(),  X_OFFSET + (2 * taillePinceau ), 2 * taillePinceau , 0, 0, bg);
+		var rt = new Text(cardvalue.r(),  X_OFFSET +( 2 * taillePinceau ), 2 * taillePinceau ,0,0,ft);
 
 		var arr = new Array();
-		arr = [background,tt,lt,bt,rt];
+		arr = [background,tt,lt,bt,rt,ta,la,ba,ra];
 		
 		graphic = new Graphiclist(arr);
-		
-        velocity = 0;
+		background.x = halfWidth;
+		background.y = halfHeight;
     }
- 
-    // sets velocity based on keyboard input
-    private function handleInput()
-    {
-        velocity = 0;
- 
-        if (Input.check("left"))
-        {
-            velocity = -2;
-        }
- 
-        if (Input.check("right"))
-        {
-            velocity = 2;
-        }
-    }
+	
+	private function reset(obj:Dynamic) 
+	{
+			if (backstate) {
+				background.play("back");
+			} else {
+				background.play("front");
+			}
+			var tween = new VarTween( null, TweenType.OneShot);
+
+			tween.tween(background, "scaleX", 1, 0.1);
+			addTween(tween);
+			backstate = !backstate;	
+	}
+
 	
 	var ease:EaseFunction;
 	
 	override function clicked(view:View) {
 
 	}
-	
-	
+		
 	public function flip(anim:Bool = true):Void {
 		if (anim) {
-		//	this._
-		}
-		if (backstate) {
-			background.play("back");
+			var tween = new VarTween( reset, TweenType.OneShot);
+			tween.tween(background, "scaleX", 0, 0.1);
+			addTween(tween);
 		} else {
-			background.play("front");
+			if (backstate) {
+				background.play("back");
+			} else {
+				background.play("front");
+			}
+			backstate = !backstate;	
 		}
-		backstate = !backstate;	
+
+		
 	}
 	
 	override function  mouseDown(){
@@ -152,33 +152,7 @@ class Card extends View
 		cb(this);
 		#end
 	}
- 
-    private function setAnimations()
-    {
- 
-            // this will flip our sprite based on direction
-            if (velocity < 0) // left
-            {
-                background.flipped = true;
-            }
-            else // right
-            {
-                background.flipped = false;
-            }
-    }
- 
-    public override function update()
-    {
-		
-        handleInput();
- 
-        moveBy(velocity, 0);
- 
-        setAnimations();
- 
-        super.update();
-    }
-	
+ 		
 	public function getRightValue():Int {
 		return cardvalue.right;
 	}

@@ -22,7 +22,7 @@ class Hand
 	public var world:World;
 	public var selected:Card;
 	private var startX:Int;
-	private static inline var DIS = 30;
+	private static inline var DIS = 60;
 	
 	public function new(world:World,role:Role,cards:Array<Card>,startX:Int = -1) 
 	{
@@ -39,15 +39,15 @@ class Hand
 		// 我方在右边,敌人在左边
 		// 我方在下,敌人在上
 		if (startX == -1)
-		role == Role.ME?startX = 430:startX = 30;
+		role == Role.ME?startX = 770:startX = 40;
 		
 		var i = 0;
 		for (c in cards) {
 			
 			c.x = startX;
-			c.y = (i) * 50 +20;
+			c.y = (i) * 101 +40;
 			c.hand = this;
-			//c.layer = 10 - i;
+			c.layer = 10 - i;
 			if (role==ENERGY)
 				c.flip(false);
 			this.world.add(c);
@@ -58,15 +58,13 @@ class Hand
 	
 	// 处理卡片的点击事件
 	public function onCardClicked(card:Card) {
-
+		
 		if (card == selected) {
-			//resetAll();
 			return;
 		}
 	//	new Sfx(ApplicationMain.getAsset("sfx/hit.mp3")).play(0.3);
 		resetAll();
 		selected = card;
-		trace(card.y);
 		// 移出一段
 		if (role == ENERGY) //向右
 		{

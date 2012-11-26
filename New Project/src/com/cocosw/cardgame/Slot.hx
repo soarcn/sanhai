@@ -22,6 +22,7 @@ class Slot extends View
     {
         super(x, y);
 		this.id = id;
+		type = "Slot";
 		bg = new Image("gfx/back.png");
 		graphic = bg;
 		empty = true;

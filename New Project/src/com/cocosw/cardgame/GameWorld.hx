@@ -7,11 +7,14 @@ import com.haxepunk.graphics.Text;
 import com.haxepunk.HXP;
 import com.haxepunk.masks.Grid;
 import com.haxepunk.Sfx;
+import com.haxepunk.tweens.misc.Alarm;
 import com.haxepunk.tweens.misc.AngleTween;
+import com.haxepunk.tweens.misc.MultiVarTween;
 import com.haxepunk.tweens.misc.VarTween;
 import com.haxepunk.tweens.motion.LinearMotion;
 import com.haxepunk.tweens.sound.Fader;
 import com.haxepunk.utils.Ease;
+import com.cocosw.cardgame.Matcher;
 import com.haxepunk.World;
 import nme.geom.Point;
 import com.haxepunk.Tween;
@@ -27,8 +30,7 @@ class GameWorld extends World
 	private var currenthand:Hand;	
 	private var myhand:Hand;	
 	private var aihand:Hand;	
-	private var sx = 130;
-	private var sy = 30;
+
 	private var mather:Matcher;
 	// 我方是否第一手
 	private var meIsFirst:Bool;
@@ -47,16 +49,15 @@ class GameWorld extends World
     public override function begin()
     {
 		var bg = new Image("gfx/background_landscape.png");
-		bg.scale = 0.5;
 		addGraphic(bg,100);
 		reset();
 		
 		//开发阶段把音乐关掉
 		#if !debug
-		if (music == null)
-			music = new Sfx("music/shuffle_or_boogie.mp3");
-
-		music.loop();
+		//if (music == null)
+			//music = new Sfx("music/shuffle_or_boogie.mp3");
+//
+		//music.loop();
 		#end
     }
 	
@@ -83,39 +84,40 @@ class GameWorld extends World
 		} else {
 			currenthand = aihand;
 		}
-		toss = new Toss();		
-		var rotate = new AngleTween(pointToHand, TweenType.OneShot);
-		toss.startPointToMe(meIsFirst, rotate);
-		add(toss);
+		toss = new Toss();
+		var tween = new VarTween(pointToHand, TweenType.OneShot);
+		tween.tween(toss, "angle", meIsFirst?270:90+1800, 1,Ease.quadInOut);
+		addTween(tween);
+		addGraphic(toss,2);
 	}
 	
 	private function pointToHand(obj:Dynamic) {
-		tossMoveToHand();
-		
+		trace("pointToHand");
+		tossMoveToHand();		
 	}
 	
 	private function start(obj:Dynamic) {
+		trace("start");
+		
+		var tween = new VarTween(null, TweenType.OneShot);
+		tween.tween(toss, "angle", 0, 0.1);
+		addTween(tween);
+		
 		readyForCard = true;
 	}
 	
 	private function tossMoveToHand() {
-		var motion = new LinearMotion(start, TweenType.OneShot);
-		if (currenthand == aihand) {
-			motion.setMotion(HXP.screen.width / 2, HXP.screen.height / 2, 60, 350, 1);
-		} else {
-			motion.setMotion(HXP.screen.width / 2, HXP.screen.height / 2, 600, 350, 1);
-		}
-		toss.addTween(motion);
+		toss.moveToHand(meIsFirst,start);
 	}
 	
 	//初始化我方卡片
 	private function initMyCard():Hand {
-		return new Hand(this,ME, CardManager.generateXCards(5),410);
+		return new Hand(this,ME, CardManager.generateXCards(5));
 	}
 	
 	//初始化对手的卡片
 	private function initAICard():Hand {
-		return new Hand(this,ENERGY, CardManager.generateXCards(5),30);
+		return new Hand(this,ENERGY, CardManager.generateXCards(5));
 	}
      
 	//根据行列获得点位
@@ -123,6 +125,9 @@ class GameWorld extends World
 		return new Point (sx+column * (Card.CARDHIGHT + GAP), sy+row * (Card.CARDHIGHT + GAP));
 		
 	}
+	
+	private var sx = 235;
+	private var sy = 100;
 	
 	// 初始化整个棋盘
 	private function initBoard ():Void {
@@ -139,9 +144,11 @@ class GameWorld extends World
 	
 	//点击棋盘空位发生的事件
 	private function onSlotClicked(slot:Slot):Void {
+		trace(readyForCard);
 		if (readyForCard == false)
 			return;
 		var card = currenthand.selected;
+		
 		if (card != null) {
 			card.cb = onCardClicked;
 			board.place(slot, card);
@@ -167,6 +174,7 @@ class GameWorld extends World
 	private function changeHand() {
 		currenthand.selected = null;
 		currenthand = currenthand == aihand?myhand:aihand;
+		toss.moveToHand(currenthand != aihand);		
 		readyForCard = true;
 	}
 	

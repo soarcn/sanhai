@@ -20,7 +20,7 @@ class View extends Entity
     public override function update()
     {
 		super.update();
-		if (collidePoint(x, y, Input.mouseX, Input.mouseY)) {
+		if (_world.collidePoint(type,Input.mouseX, Input.mouseY) == this) {
 			if (Input.mouseReleased)
 			{
 				clicked(this);
